@@ -41,7 +41,7 @@ export const HtmlToMarkdownParser = (html) => {
 	if (string === '<br>') {
 		return ''
 	}
-	console.log('html:', string)
+	// console.log('html:', string)
 	rules.forEach((i) => {
 		if(typeof i.rule === 'function') {
 			return string = i.rule(string, i.regex)
@@ -50,7 +50,7 @@ export const HtmlToMarkdownParser = (html) => {
 			return string = string.replace(i.regex, i.rule)
 		}
 	})
-	console.log('markdown:', string)
+	// console.log('markdown:', string)
 	return string
 }
 

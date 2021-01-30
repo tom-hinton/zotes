@@ -1,6 +1,6 @@
 import SidebarNav from './SidebarNav'
 import ViewManager from './ViewManager'
-import InlineMarkdownEditor from './InlineMarkdownEditor'
+import Editor from './Editor'
 import ContentEditable from './ContentEditable'
 
-export { SidebarNav, ViewManager, InlineMarkdownEditor, ContentEditable }
+export { SidebarNav, ViewManager, Editor, ContentEditable }

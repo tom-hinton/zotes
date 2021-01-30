@@ -26,10 +26,6 @@ function getChildNode(containerEl, containerOffset) {
          offset = containerOffset - count
          count += range.toString().length
       } else {
-         // console.log('count:', count)
-         // console.log('container offset:', containerOffset)
-         // console.log(containerEl)
-         // console.log(el)
          count++
       }
       i++
