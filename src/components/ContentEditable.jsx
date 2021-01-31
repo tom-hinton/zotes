@@ -14,6 +14,7 @@ function normalizeHtml(str) {
 
 // Replace cursor in correct position
 function getChildNode(containerEl, containerOffset) {
+   // console.log('update')
    let count = 0
    let i = 0
    let el
@@ -29,15 +30,18 @@ function getChildNode(containerEl, containerOffset) {
       else {
          count++
       }
+      // console.log('el', el, el.innerHTML)
+      // console.log('offset remaining (container/child)', containerOffset, offset)
       i++
    }
    // console.log({ containerEl, containerOffset, el, offset })
    return { el, offset }
 }
 function replaceCaret(containerEl, containerOffset) {
+   // console.log('----')
    const sel = window.getSelection()
 
-   console.log('offset:', containerOffset)
+   // console.log('offset:', containerOffset)
    let el = containerEl
    let offset = containerOffset
    while (el !== undefined && el.nodeType !== 3 && el.childNodes.length > 0) {
@@ -108,6 +112,23 @@ export default class ContentEditable extends Component {
             preCaretRange.setEnd(range.endContainer, range.endOffset)
             caretOffset = preCaretRange.toString().length
          }
+
+         // HACK
+         let match = props.html.match(/<p>(.*?)<\/p>/igm)
+         let nextMatch = nextProps.html.match(/<p>(.*?)<\/p>/igm)
+
+         if(match.length === nextMatch.length) {
+            match.forEach((item, i) => {
+               console.log(item, nextMatch[i])
+               if(nextMatch[i] === '<p></p>' && item.length > 7) {
+                  console.log('reducing caret offset')
+                  caretOffset --
+               }
+            })
+
+         }
+         console.log({ match, nextMatch })
+
          this.caretOffset = caretOffset
 			return true
 		};

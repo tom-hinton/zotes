@@ -59,7 +59,18 @@ app.whenReady().then(() => {
 				label: 'Search Notes',
 				accelerator: process.platform === 'darwin' ? 'Cmd+L' : 'Ctrl+L',
 				click: () => win.webContents.send('activate-search')
-			}
+			},
+			{ type: 'separator' },
+			{
+				label: 'Note Below',
+				accelerator: process.platform === 'darwin' ? 'Cmd+Option+Down' : 'Ctrl+Down',
+				click: () => win.webContents.send('navigate-down')
+			},
+			{
+				label: 'Note Above',
+				accelerator: process.platform === 'darwin' ? 'Cmd+Option+Up' : 'Ctrl+Up',
+				click: () => win.webContents.send('navigate-up')
+			},
 		]
 	}))
 	Menu.setApplicationMenu(menu)
