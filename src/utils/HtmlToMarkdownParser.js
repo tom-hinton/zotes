@@ -10,7 +10,7 @@
 const test = (string, regex) => {
 	// console.log('string', string)
 	// console.log('regex', regex)
-	// console.log('match', string.match(regex))
+	console.log('match', string.match(regex))
 	return string
 }
 const breaks = (string, regex) => {
@@ -19,17 +19,27 @@ const breaks = (string, regex) => {
 		return fullString === '<br>' ? '' : '\n'
 	})
 }
+const consecutive = (string, regex) => {
+	return string.replace(regex, (match, p1, p2) => {
+		if (p2 === '<br>' || p1 === '<br>') {
+			return match
+		}
+		return p1 + '\n' + p2
+	})
+}
 const rules = [
-	// { regex: /<p><\/p><p>(<br>)+<\/p>/, rule: test},
+	{ regex: /<p>(.*)<\/p><p>(.*)<\/p>/igm, rule: consecutive },
+	{ regex: /<h\d><br><\/h\d>/igm, rule: '' },
+	{ regex: /^<p><br><\/p>$/igm, rule: '' },
+	{ regex: /<a data-redirectid="(.*?)".*?>\[(.*?)\]<\/a>/igm, rule: '[$2]($1)' },
+	{ regex: /<a.*?>(.*?)<\/a>/igm, rule: '$1' },
 	{ regex: /<em>(.*?)<\/em>/igm, rule: '$1' },
 	{ regex: /<strong>(.*?)<\/strong>/igm, rule: '$1' },
 	{ regex: /<h\d>(.*?)<\/h\d>/igm, rule: '$1' },
 	{ regex: /<p>(.*?)<\/p>/igm, rule: '$1' },
 	{ regex: /<div>(.*?)<\/div>/igm, rule: '$1' },
 	{ regex: /<br><br>/igm, rule: '' },
-	{ regex: /<br>/igm, rule: breaks },
-	// { regex: /<div><br><\/div>/igm, rule: '\n' },
-	// { regex: /(?<=.)<br>/igm, rule: '\n' },
+	{ regex: /<br>/igm, rule: '\n' },
 ]
 
 
@@ -38,10 +48,10 @@ const rules = [
 /****    PARSER LOGIC    ****/
 export const HtmlToMarkdownParser = (html) => {
 	let string = html
-	if (string === '<br>') {
+	if (string === '<p><br></p>') {
 		return ''
 	}
-	// console.log('html:', string)
+	console.log('html:', string)
 	rules.forEach((i) => {
 		if(typeof i.rule === 'function') {
 			return string = i.rule(string, i.regex)
@@ -50,7 +60,8 @@ export const HtmlToMarkdownParser = (html) => {
 			return string = string.replace(i.regex, i.rule)
 		}
 	})
-	// console.log('markdown:', string)
+	console.log('markdown:', string)
+	// console.log('newline count', string.match(/\n/g))
 	return string
 }
 

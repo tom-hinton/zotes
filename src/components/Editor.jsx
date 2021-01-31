@@ -2,6 +2,7 @@
 import React, { Component } from 'react'
 import { ContentEditable } from './index.js'
 import { parse } from '../utils/index.js'
+import { Redirect } from 'react-router-dom'
 const path = window.require('path')
 const fs = window.require('fs').promises
 const chokidar = window.require('chokidar')
@@ -35,7 +36,9 @@ export default class Editor extends Component {
 
 		this.state = {
 			value: '',
-			filePath: ''
+			filePath: '',
+			redirectId: null,
+			modifiedMs: 0
 		}
 
 		this.contentEditable = React.createRef()
@@ -45,19 +48,23 @@ export default class Editor extends Component {
 
 	fetchNote() {
 		const { id } = this.props.match.params
-		if (typeof parseInt(id) === 'number') {
-			const filename = parseInt(id).toString() + '.txt'
+		if (typeof id === 'string') {
+			const filename = id + '.txt'
 			const filePath = dirPath + '/' + filename
-			this.setState({ filePath })
 
 			if (this.watcher === null) {
 				this.watcher = chokidar.watch(filePath, {
-					usePolling: true
+					usePolling: true,
+					alwaysStat: true
 				})
-				.on('all', (eventType, filePath) => {
+				.on('all', (eventType, filePath, stat) => {
 					if(eventType === 'add' || eventType === 'change') {
 						fs.readFile(filePath, 'utf8')
-						.then(file => this.setState({ value: file }))
+						.then(file => this.setState({
+							value: file,
+							filePath,
+							redirectId: null,
+						}))
 					}
 				})
 			} else {
@@ -69,19 +76,24 @@ export default class Editor extends Component {
 	componentDidMount() {
 		this.fetchNote()
 
-		ipcRenderer.on('please-save-file', () =>
+		ipcRenderer.on('please-save-file', () =>{
+			// console.log(this.state)
 			ipcRenderer.invoke('save-file', this.state.filePath, this.state.value)
-		)
+		})
+		ipcRenderer.on('new-file', (event, id) => {
+			this.setState({ redirectId: id })
+		})
 
+		window.handleInternalLink = (redirectId) => this.setState({ redirectId })
 	}
 
 	componentDidUpdate(prevProps) {
 		const { id } = this.props.match.params
 		const prevId = prevProps.match.params.id
 
-		if (id !== prevId && typeof parseInt(id) === 'number' && this.watcher !== null) {
-			console.log('update', id, prevId)
-			const prevFilename = parseInt(prevId).toString() + '.txt'
+		// console.log('update', id, prevId)
+		if (id !== prevId && typeof id === 'string' && this.watcher !== null) {
+			const prevFilename = prevId + '.txt'
 			const prevFilePath = dirPath + '/' + prevFilename
 
 			clearWatcher(this.watcher)
@@ -95,6 +107,9 @@ export default class Editor extends Component {
 	}
 
 	render() {
+		if (typeof this.state.redirectId === 'string') {
+			return <Redirect to={'/' + this.state.redirectId} />
+		}
 		const html = parse.markdown(this.state.value)
 		return <ContentEditable
 			innerRef={this.contentEditable}

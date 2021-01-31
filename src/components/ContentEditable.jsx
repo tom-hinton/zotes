@@ -25,18 +25,19 @@ function getChildNode(containerEl, containerOffset) {
          range.selectNodeContents(el)
          offset = containerOffset - count
          count += range.toString().length
-      } else {
+      }
+      else {
          count++
       }
       i++
    }
-   console.log({ containerEl, containerOffset, el, offset })
+   // console.log({ containerEl, containerOffset, el, offset })
    return { el, offset }
 }
 function replaceCaret(containerEl, containerOffset) {
    const sel = window.getSelection()
 
-   // console.log('offset:', offset)
+   console.log('offset:', containerOffset)
    let el = containerEl
    let offset = containerOffset
    while (el !== undefined && el.nodeType !== 3 && el.childNodes.length > 0) {
