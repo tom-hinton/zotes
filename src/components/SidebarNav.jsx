@@ -7,6 +7,7 @@ const fs = window.require('fs').promises
 const chokidar = window.require('chokidar')
 const { remote, ipcRenderer } = window.require('electron')
 const { Menu, MenuItem } = remote
+const Preferences = window.require('./src/preferences.js')
 
 
 class SidebarNav extends Component {
@@ -47,10 +48,9 @@ class SidebarNav extends Component {
 	}
 
 	componentDidMount() {
-		const dirPath = '/users/tomhinton/Zettelkasten'
 
 		// Start watching file system
-		const watcher = chokidar.watch(dirPath, {
+		const watcher = chokidar.watch(Preferences.get('zotesDir') + '/*.txt', {
 			usePolling: true,
 			ignored: /(^|[\/\\])\../,
 			alwaysStat: true
@@ -103,6 +103,8 @@ class SidebarNav extends Component {
 				return newState
 			})
 		})
+
+		.on('error', err => console.log('chokidar error', err))
 
 		// Save watcher
 		this.setState({ watcher })

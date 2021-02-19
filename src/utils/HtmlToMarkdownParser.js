@@ -30,8 +30,9 @@ const consecutive = (string, regex) => {
 const rules = [
 	{ regex: /<p>(.*)<\/p><p>(.*)<\/p>/igm, rule: consecutive },
 	{ regex: /<h\d><br><\/h\d>/igm, rule: '' },
+	{ regex: /<a.*><br><\/a>/igm, rule: '' },
 	{ regex: /^<p><br><\/p>$/igm, rule: '' },
-	{ regex: /<a data-redirectid="(.*?)".*?>\[(.*?)\]<\/a>/igm, rule: '[$2]($1)' },
+	{ regex: /<a data-redirectid="(.*?)".*?>\[(.*?)\](.*?)<\/a>/igm, rule: '[$2]($1)$3' },
 	{ regex: /<a.*?>(.*?)<\/a>/igm, rule: '$1' },
 	{ regex: /<em>(.*?)<\/em>/igm, rule: '$1' },
 	{ regex: /<strong>(.*?)<\/strong>/igm, rule: '$1' },
@@ -51,7 +52,7 @@ export const HtmlToMarkdownParser = (html) => {
 	if (string === '<p><br></p>') {
 		return ''
 	}
-	console.log('html:', string)
+	// console.log('html:', string)
 	rules.forEach((i) => {
 		if(typeof i.rule === 'function') {
 			return string = i.rule(string, i.regex)
@@ -60,7 +61,7 @@ export const HtmlToMarkdownParser = (html) => {
 			return string = string.replace(i.regex, i.rule)
 		}
 	})
-	console.log('markdown:', string)
+	// console.log('markdown:', string)
 	// console.log('newline count', string.match(/\n/g))
 	return string
 }

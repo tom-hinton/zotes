@@ -7,9 +7,7 @@ const path = window.require('path')
 const fs = window.require('fs').promises
 const chokidar = window.require('chokidar')
 const ipcRenderer = window.require('electron').ipcRenderer
-
-// Constant (TODO: make dynamic)
-const dirPath = '/users/tomhinton/Zettelkasten'
+const Preferences = window.require('./src/preferences.js')
 
 
 
@@ -50,7 +48,7 @@ export default class Editor extends Component {
 		const { id } = this.props.match.params
 		if (typeof id === 'string') {
 			const filename = id + '.txt'
-			const filePath = dirPath + '/' + filename
+			const filePath = Preferences.get('zotesDir') + '/' + filename
 
 			if (this.watcher === null) {
 				this.watcher = chokidar.watch(filePath, {
@@ -63,7 +61,7 @@ export default class Editor extends Component {
 						.then(file => this.setState({
 							value: file,
 							filePath,
-							redirectId: null,
+							redirectId: null
 						}))
 					}
 				})
@@ -94,7 +92,7 @@ export default class Editor extends Component {
 		// console.log('update', id, prevId)
 		if (id !== prevId && typeof id === 'string' && this.watcher !== null) {
 			const prevFilename = prevId + '.txt'
-			const prevFilePath = dirPath + '/' + prevFilename
+			const prevFilePath = Preferences.get('zotesDir') + '/' + prevFilename
 
 			clearWatcher(this.watcher)
 			this.fetchNote()

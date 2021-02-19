@@ -19,7 +19,7 @@ function getChildNode(containerEl, containerOffset) {
    let i = 0
    let el
    let offset = 0
-   while (count <= containerOffset) {
+   while (count < containerOffset) {
       el = containerEl.childNodes[i]
       const range = document.createRange()
       if(el !== undefined) {
@@ -103,6 +103,8 @@ export default class ContentEditable extends Component {
 		// We need not rerender if the change of props simply reflects the user's edits.
 		// Rerendering in this case would make the cursor/caret jump
 		if ( normalizeHtml(nextProps.html) !== normalizeHtml(el.innerHTML) ) {
+         console.log(el.innerHTML)
+
          let caretOffset = 0
          let sel = window.getSelection()
          if (sel.rangeCount > 0) {
@@ -111,23 +113,24 @@ export default class ContentEditable extends Component {
             preCaretRange.selectNodeContents(el)
             preCaretRange.setEnd(range.endContainer, range.endOffset)
             caretOffset = preCaretRange.toString().length
+
+
+            // HACK
+            const anchorNode = sel.anchorNode
+            if(anchorNode.innerHTML === '<br>' && (anchorNode.tagName === 'P' || anchorNode.tagName === 'DIV')) {
+               caretOffset++
+            }
+
+            const anchorRange = range.cloneRange()
+            anchorRange.selectNodeContents(anchorNode)
+            anchorRange.setEnd(range.endContainer, range.endOffset)
+            const regex = /\[.*?\](\(.*?\))/i
+            const arr = regex.exec(anchorRange.toString())
+            if (arr !== null) {
+               caretOffset -= arr[1].length
+            }
+            console.log(arr)
          }
-
-         // HACK
-         let match = props.html.match(/<p>(.*?)<\/p>/igm)
-         let nextMatch = nextProps.html.match(/<p>(.*?)<\/p>/igm)
-
-         if(match.length === nextMatch.length) {
-            match.forEach((item, i) => {
-               console.log(item, nextMatch[i])
-               if(nextMatch[i] === '<p></p>' && item.length > 7) {
-                  console.log('reducing caret offset')
-                  caretOffset --
-               }
-            })
-
-         }
-         console.log({ match, nextMatch })
 
          this.caretOffset = caretOffset
 			return true
@@ -155,6 +158,9 @@ export default class ContentEditable extends Component {
 			el.innerHTML = this.props.html
 		}
 		this.lastHtml = this.props.html
+		if(this.props.resetcursor) {
+			return this.props.updateresetcursor(false)
+		}
 		replaceCaret(el, this.caretOffset)
 	}
 

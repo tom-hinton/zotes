@@ -1,9 +1,9 @@
 /****    IMPORTS    ****/
-const { app, BrowserWindow, ipcMain, Menu, MenuItem } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu, MenuItem, dialog } = require('electron')
 const fs = require('fs').promises
+const path = require('path')
 const uniqid = require('uniqid')
-
-const dirPath = '/users/tomhinton/Zettelkasten'
+const Preferences = require('./preferences.js')
 
 
 /****    WINDOWS    ****/
@@ -31,19 +31,31 @@ app.whenReady().then(() => {
 	menu.append(new MenuItem({ role: 'appMenu' }))
 	menu.append(new MenuItem({
 		submenu: [{
-			label: 'Save',
-			accelerator: process.platform === 'darwin' ? 'Cmd+S' : 'Ctrl+S',
-			click: () => win.webContents.send('please-save-file')
+			label: 'Select Folder',
+			click: () => {
+				dialog.showOpenDialog(win, {
+					properties: ['openDirectory']
+				}).then(result => {
+					if(!result.canceled) {
+						Preferences.set('zotesDir', result.filePaths[0])
+					}
+				})
+			}
 		},
 		{
 			label: 'New Note',
 			accelerator: process.platform === 'darwin' ? 'Cmd+N' : 'Ctrl+N',
 			click: () => {
 				const id = uniqid.time()
-				const filePath = dirPath + '/' + id + '.txt'
+				const filePath = Preferences.get('zotesDir') + '/' + id + '.txt'
 				fs.writeFile(filePath, '', { encoding: 'utf8' })
 				.then(() => win.webContents.send('new-file', id))
 			}
+		},
+		{
+			label: 'Save Note',
+			accelerator: process.platform === 'darwin' ? 'Cmd+S' : 'Ctrl+S',
+			click: () => win.webContents.send('please-save-file')
 		}],
 		label: 'File',
 		// role: 'fileMenu'
@@ -94,6 +106,6 @@ ipcMain.handle('save-file', (event, filePath, data) =>
 	fs.writeFile(filePath, data, { encoding: 'utf8' })
 )
 ipcMain.handle('delete-file', (event, fileId) => {
-	const filePath = dirPath + '/' + fileId + '.txt'
+	const filePath = Preferences.get('zotesDir') + '/' + fileId + '.txt'
 	fs.unlink(filePath)
 })

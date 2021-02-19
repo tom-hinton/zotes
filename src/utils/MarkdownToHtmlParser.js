@@ -20,8 +20,8 @@ const rules = [
 	{ regex: /^(#+)(.*)/igm, rule: heading },
 	{ regex: /\*\*(.*?)\*\*/igm, rule: '<strong>**$1**</strong>' },
 	{ regex: /(?<!\*)\*(?!\*)(.*?)(?<!\*)\*(?!\*)/igm, rule: '<em>*$1*</em>' },
-	{ regex: /\[(.*?)\]\((.*?)\)/igm, rule: '<a data-redirectid="$2" onclick="window.handleInternalLink(\'$2\')">[$1]</a>' },
-	{ regex: / (#\w*)(?!\w)/igm, rule: ' <a onclick="window.searchNotes(\'$1\')">$1</a>' },
+	{ regex: /\[(.*?)\]\((.*?)\)/igm, rule: '<a data-redirectid="$2" data-linktype="note" onclick="window.handleInternalLink(\'$2\')">[$1]</a>' },
+	{ regex: / (#\w*)(?!\w)/igm, rule: ' <a data-linktype="tag" onclick="window.searchNotes(\'$1\')">$1</a>' },
 ]
 
 
